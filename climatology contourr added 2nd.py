@@ -21,14 +21,15 @@ from matplotlib.gridspec import GridSpec
 # =========================================================
 
 ds = xr.open_dataset(
-    '/Users/dsha0113/Documents/PhD_Work/Data_Analysis/Netcdf_data/skj_4th/skj_totbm_Fref.nc',
-    decode_times=False)
+    '/Users/dsha0113/Documents/PhD_Work/Data_Analysis/Netcdf_data/skj_hist/skj_Btot_hist_F0.nc',
+    decode_times=False
+)
 
-bio_time = pd.date_range('1998-01-15', periods=ds.sizes['time'], freq='MS') \
+bio_time = pd.date_range('1980-01-15', periods=ds.sizes['time'], freq='MS') \
            + pd.Timedelta(days=14)
 
 ds   = ds.assign_coords(time=bio_time)
-data = ds['skj_totbm_Fref']   # (time, lat, lon)
+data = ds['skj_Btot']   # (time, lat, lon)
 
 # =========================================================
 # 2. LOAD SST — Niño3.4
@@ -40,7 +41,7 @@ era5 = xr.open_dataset(
 
 sst_full = (
     era5["sst"]
-    .sel(valid_time=slice("1998-01-01","2019-12-31"),
+    .sel(valid_time=slice("1980-01-01","2010-12-31"),
          latitude=slice(30,-30),
          longitude=slice(120,290))
     .rename({"valid_time":"time","latitude":"lat","longitude":"lon"})

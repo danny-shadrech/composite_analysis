@@ -1,7 +1,7 @@
 """
-Curtain Plot — Niño3.4 (left) + Hovmöller biomass anomaly (right)
+Curtain Plot — Niño3.4 (left) + Hovmöller biomass mean (right)
 ==============================================================
-LEFT  : x = Niño3.4 anomaly (°C),  y = time (1998 top → 2019 bottom)
+LEFT  : x = Niño3.4 anomaly (°C),  y = time (1980 top → 2010 bottom)
 RIGHT : x = longitude,              y = time (same orientation)
         Colour = biomass mean, equatorial strip 10°S–10°N
 """
@@ -21,15 +21,15 @@ from matplotlib.gridspec import GridSpec
 # =========================================================
 
 ds = xr.open_dataset(
-    '/Users/dsha0113/Documents/PhD_Work/Data_Analysis/Netcdf_data/skj_4th/skj_totbm_Fref.nc',
+    '/Users/dsha0113/Documents/PhD_Work/Data_Analysis/Netcdf_data/skj_hist/skj_Btot_hist_F0.nc',
     decode_times=False
 )
 
-bio_time = pd.date_range('1998-01-15', periods=ds.sizes['time'], freq='MS') \
+bio_time = pd.date_range('1980-01-15', periods=ds.sizes['time'], freq='MS') \
            + pd.Timedelta(days=14)
 
 ds   = ds.assign_coords(time=bio_time)
-data = ds['skj_totbm_Fref']   # (time, lat, lon)
+data = ds['skj_Btot']   # (time, lat, lon)
 
 # =========================================================
 # 2. LOAD SST — Niño3.4
@@ -41,7 +41,7 @@ era5 = xr.open_dataset(
 
 sst_full = (
     era5["sst"]
-    .sel(valid_time=slice("1998-01-01","2019-12-31"),
+    .sel(valid_time=slice("1980-01-01","2010-12-31"),
          latitude=slice(30,-30),
          longitude=slice(120,290))
     .rename({"valid_time":"time","latitude":"lat","longitude":"lon"})
@@ -181,8 +181,8 @@ LA_NINA_COL = '#4A90D9'
 OCEAN_DARK  = '#0A1628'
 OCEAN_MID   = '#0D1E3A'
 GRID_COLOR  = '#1E3A5F'
-TEXT_LIGHT  = "#1989C5"
-TEXT_DIM    = "#253D4F"
+TEXT_LIGHT  = "#3499C4"
+TEXT_DIM    = "#0E179D"
 
 # =========================================================
 # 5. FIGURE
@@ -190,7 +190,7 @@ TEXT_DIM    = "#253D4F"
 
 plt.rcParams.update({'font.family':'sans-serif','font.sans-serif':['DejaVu Sans']})
 
-fig = plt.figure(figsize=(16, 8), facecolor='white')
+fig = plt.figure(figsize=(16, 10), facecolor='white')
 
 gs = GridSpec(1, 2, figure=fig,
               left=0.08, right=0.93,
@@ -331,16 +331,17 @@ for start, end in lanina_periods:
     )
 
 # 29°C isotherm contour — use SST time axis aligned to bio year_arr
+
 sst_LON2, sst_YR2 = np.meshgrid(sst_lons, year_arr)
 cs = ax_hov.contour(
     sst_LON2, sst_YR2, sst_mat,
     levels=[29],
-    colors='red',
-    linewidths=0.8,
+    colors='limegreen',
+    linewidths=1.2,
     linestyles='solid',
 )
+ax_hov.clabel(cs, fmt='29°C', fontsize=7, inline=True, colors='black')
 
-ax_hov.clabel(cs, fmt='%d°C', fontsize=8, inline=True, colors='black')
 
 # y-axis: every year
 ax_hov.yaxis.set_visible(False)
@@ -376,7 +377,7 @@ cbar.outline.set_edgecolor('black')
 # =========================================================
 
 fig.text(0.5, 0.935,
-         'Skipjack Tuna Biomass Over ENSO Cycle  (1998–2019)',
+         'Skipjack Tuna Biomass Over ENSO Cycle  (1980–2010)',
          ha='center', color='black', fontsize=13, fontweight='bold')
 fig.text(0.5, 0.900,
          'Left: Niño3.4 curtain   |   Right: Hovmöller biomass mean',
